@@ -1,0 +1,123 @@
+Sistema de gestión de pedidos de una tienda.
+
+Tablas
+CREATE TABLE clientes (
+    id_cliente INT PRIMARY KEY,
+    nombre VARCHAR(100),
+    correo VARCHAR(100)
+);
+
+CREATE TABLE productos (
+    id_producto INT PRIMARY KEY,
+    nombre_producto VARCHAR(100),
+    precio DECIMAL(10,2)
+);
+
+CREATE TABLE pedidos (
+    id_pedido INT PRIMARY KEY,
+    id_cliente INT,
+    fecha_pedido DATE,
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
+);
+
+CREATE TABLE detalle_pedido (
+    id_detalle INT PRIMARY KEY,
+    id_pedido INT,
+    id_producto INT,
+    cantidad INT,
+    FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido),
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
+);
+Datos de prueba
+INSERT INTO clientes VALUES
+(1,'Juan Pérez','juan@gmail.com'),
+(2,'María López','maria@gmail.com');
+
+INSERT INTO productos VALUES
+(1,'Laptop',15000),
+(2,'Mouse',300),
+(3,'Teclado',500);
+
+INSERT INTO pedidos VALUES
+(1,1,'2026-06-01'),
+(2,2,'2026-06-02');
+
+INSERT INTO detalle_pedido VALUES
+(1,1,1,1),
+(2,1,2,2),
+(3,2,3,1);
+Consulta a validar
+
+SELECT
+    cli.nombre,
+    ped.fechapedido
+FROM clientes cli
+INNER JOIN pedidos ped
+    ON cli.ClienteID = ped.ClienteID
+;
+
+************Caso de Prueba QA***********************
+ID: JI-01
+Nombre: Mostrar nombre del cliente y fecha del pedido.
+Módulo: Consulta de pedidos.
+Prioridad: Alta
+
+Precondiciones:
+Existir clientes registrados.
+Existir pedidos asociados a clientes.
+Base de datos disponible.
+Datos de prueba
+Cliente	Pedido
+Juan Pérez	2026-06-01
+María López	2026-06-02
+Pasos
+Ejecutar la consulta SQL.
+Validar que se obtengan registros.
+Verificar que el nombre corresponda al cliente correcto.
+Verificar que la fecha corresponda al pedido correcto.
+
+Resultado Esperado: El sistema debe mostrar
+
+Nombre	Fecha
+Juan Pérez	2026-06-01
+María López	2026-06-02
+
+Resultado Obtenido: Pendiente de ejecución.
+
+Estatus: No Ejecutado.
+
+ID: JI-02
+
+Nombre: Validar cantidad de pedidos por cliente.
+
+select
+    cli.nombre,
+    Count(ped.PedidoID) Total_Pedidos
+from 
+    Clientes cli
+JOIN Pedidos ped 
+    on cli.ClienteID = ped.ClienteID
+group by 
+    cli.Nombre
+;
+
+Resultado Esperado
+Nombre	Total
+Ana Lopez 1
+Juan Pérez 2
+Luis Torres 1
+
+
+ID: JI-03
+Nombre: Validar monto total por pedido.
+Consulta:
+SELECT
+    ped.PedidoID,
+    SUM(prod.Precio * dped.Cantidad) AS Total
+FROM pedidos ped
+INNER JOIN detallepedido dped
+    ON ped.PedidoID = dped.PedidoID
+INNER JOIN productos prod
+    ON dped.ProductoID = prod.ProductoID
+GROUP BY ped.PedidoID
+;
